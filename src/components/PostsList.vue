@@ -25,11 +25,11 @@ const props = defineProps<IProps>();
 .post-list-move,
 .post-list-enter-active,
 .post-list-leave-active {
-  transition: all 0.7s linear;
+	transition: all 0.7s linear;
 }
 .post-list-enter-from,
 .post-list-leave-to {
-  opacity: 0;
-  transform: translateX(-150px);
+	opacity: 0;
+	transform: translateX(-150px);
 }
 </style>

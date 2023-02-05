@@ -30,10 +30,12 @@ export default {
 
 <style>
 .input {
+	min-width: 80vw;
 	margin-top: 10px;
 	height: 25px;
 	border: 2px solid navy;
 	border-radius: 5px;
 	box-shadow: 5px 5px 5px gray;
+	align-self: center;
 }
 </style>

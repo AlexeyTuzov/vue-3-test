@@ -1,14 +1,30 @@
 <template>
 	<div>
+		<h1>Posts Page</h1>
 		<div class="head_menu">
-			<button-item title="Create Post" @click="showModal" />
-			<selector-item v-model="selectedOption" :options="options" />
+			<div class="create_n_search">
+				<button-item title="Create Post" @click="showModal" />
+				<selector-item
+					v-model="selectedOption"
+					:options="options"
+					placeholder="Sort by..."
+				/>
+			</div>
+			<input-item v-model="searchBy" placeholder="Search..." />
 		</div>
 		<modal-window v-model:show="isModalVisible">
 			<post-form @createPost="createPost" />
 		</modal-window>
-		<posts-list v-if="!isFetching" :posts="posts" @deletePost="deletePost" />
+		<posts-list
+			v-if="!isFetching"
+			:posts="sortedAndSearchedPosts"
+			@deletePost="deletePost"
+		/>
 		<div v-else>Loading posts...</div>
+		<pagination-wrapper
+			:totalCount="totalPagesCount"
+			v-model:currentPage="currentPage"
+		/>
 	</div>
 </template>
 
@@ -18,6 +34,7 @@ import PostsList from '@/components/PostsList.vue';
 import type { Post } from '@/components/Post.vue';
 import axios from 'axios';
 import type { IOptions } from './components/UI/Selector.vue';
+import debounce from '@/utilites/debounce';
 
 export default {
 	components: {
@@ -31,15 +48,20 @@ export default {
 			isFetching: false,
 			options: [
 				{
-					title: 'Search by title',
+					title: 'Sort by title',
 					value: 'title'
 				},
 				{
-					title: 'Search by text',
+					title: 'Sort by text',
 					value: 'body'
 				}
 			] as IOptions[],
-			selectedOption: ''
+			selectedOption: '',
+			searchBy: '',
+			pageNumber: 1,
+			pageLimit: 10,
+			totalPagesCount: 1,
+			currentPage: 1
 		};
 	},
 	methods: {
@@ -60,7 +82,16 @@ export default {
 			try {
 				this.isFetching = true;
 				const response = await axios.get(
-					'https://jsonplaceholder.typicode.com/posts?_limit=10'
+					'https://jsonplaceholder.typicode.com/posts',
+					{
+						params: {
+							_page: this.pageNumber,
+							_limit: this.pageLimit
+						}
+					}
+				);
+				this.totalPagesCount = Math.ceil(
+					response.headers['x-total-count'] / this.pageLimit
 				);
 				this.posts = response.data;
 			} catch (err) {
@@ -73,11 +104,19 @@ export default {
 	mounted() {
 		this.fetchPosts();
 	},
-	watch: {
-		selectedOption(criteria: keyof Post) {
-			this.posts.sort((post1, post2) => {
-				return String(post1[criteria]).localeCompare(String(post2[criteria]));
-			});
+
+	computed: {
+		sortedPosts() {
+			return [...this.posts].sort((post1, post2) =>
+				String(post1[this.selectedOption as keyof Post])?.localeCompare(
+					String(post2[this.selectedOption as keyof Post])
+				)
+			);
+		},
+		sortedAndSearchedPosts() {
+			return this.sortedPosts.filter((post) =>
+				post.title.includes(this.searchBy)
+			);
 		}
 	}
 };
@@ -85,6 +124,13 @@ export default {
 
 <style>
 .head_menu {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.create_n_search {
+	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-around;

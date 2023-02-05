@@ -1,6 +1,6 @@
 <template>
 	<select @change="onChange" :value="modelValue">
-		<option disabled value="">Search by...</option>
+		<option disabled value="">{{ placeholder }}</option>
 		<option v-for="option in options" :key="option.value" :value="option.value">
 			{{ option.title }}
 		</option>
@@ -15,6 +15,7 @@ export interface IOptions {
 
 export interface IProps {
 	options: IOptions[];
+	placeholder: StaticRangeInit;
 	modelValue: string;
 }
 
@@ -35,6 +36,7 @@ export default {
 <style>
 select {
 	min-width: 30vw;
-	min-height: 5vh;
+	min-height: 30px;
+	margin: 10px;
 }
 </style>
