@@ -58,7 +58,6 @@ export default {
 			] as IOptions[],
 			selectedOption: '',
 			searchBy: '',
-			pageNumber: 1,
 			pageLimit: 10,
 			totalPagesCount: 1,
 			currentPage: 1
@@ -85,7 +84,7 @@ export default {
 					'https://jsonplaceholder.typicode.com/posts',
 					{
 						params: {
-							_page: this.pageNumber,
+							_page: this.currentPage,
 							_limit: this.pageLimit
 						}
 					}
@@ -118,7 +117,12 @@ export default {
 				post.title.includes(this.searchBy)
 			);
 		}
-	}
+	},
+    watch: {
+        currentPage() {
+            this.fetchPosts();
+        }
+    }
 };
 </script>
 
